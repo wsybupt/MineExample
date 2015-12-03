@@ -1,0 +1,95 @@
+name: "mine"
+layer {
+  name: "data"
+  type: "HDF5Data"
+  top: "data"
+  top: "label"
+  hdf5_data_param {
+    source: "examples/mine/data/train.txt"
+    batch_size: 1000
+  }
+  include:{phase:TRAIN}
+}
+layer {
+  name: "data"
+  type: "HDF5Data"
+  top: "data"
+  top: "label"
+  hdf5_data_param {
+    source: "examples/mine/data/test.txt"
+    batch_size: 100
+  }
+  include:{phase:TEST}
+}
+layer {
+  name: "fc1"
+  type: "InnerProduct"
+  bottom: "data"
+  top: "fc1"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
+  inner_product_param {
+    num_output: 2
+    weight_filler {
+      type: "gaussian"
+      std: 0.005
+    }
+    bias_filler {
+      type: "constant"
+      value: 1
+    }
+  }
+}
+
+layer {
+  name: "pow1"
+  type: "Power"
+  bottom: "fc1"
+  top: "fc1"
+  power_param{
+    power:1
+    scale:1
+    shift:0
+  }
+}
+
+layer {
+  name: "fc2"
+  type: "InnerProduct"
+  bottom: "fc1"
+  top: "fc2"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
+  inner_product_param {
+    num_output: 2
+    weight_filler {
+      type: "gaussian"
+      std: 0.005
+    }
+    bias_filler {
+      type: "constant"
+      value: 1
+    }
+  }
+}
+
+
+layer {
+  name: "loss"
+  type: "EuclideanLoss"
+  bottom: "fc2"
+  bottom: "label"
+  top: "loss"
+}
